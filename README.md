@@ -1,7 +1,6 @@
 # sre-platform-lab
 
-A hands-on SRE portfolio project demonstrating reliability engineering, observability,
-chaos engineering, and AI-assisted incident response — no LLM subscription required.
+My "SRE lab" for testing out new ideas and approaches related to reliability engineering, observability, chaos engineering, and agentic incident response — where a real AI agent spins up on alert, diagnoses the issue, reasons through it, and applies a fix.
 
 ## What's here
 
@@ -16,9 +15,10 @@ Pre-provisioned dashboards and SLO burn-rate alerts.
 Triggers real SLO alerts.
 
 **SRE AI agent** — Webhook-triggered FastAPI service. When Alertmanager fires, the agent spawns
-[OpenCode](https://opencode.ai) with BigPickle (free) as the LLM. OpenCode uses MCP tools
-(Grafana MCP for metrics/logs, Alertmanager MCP for alert operations) to investigate the root
-cause and remediate — no human required.
+[OpenCode](https://opencode.ai), which uses MCP tools (Grafana for metrics/logs, Alertmanager
+for alert ops) to investigate the root cause and remediate. Runs on
+[BigPickle](https://opencode.ai/docs/zen/) — OpenCode's free model — so anyone can clone and
+run this without an API key or LLM subscription.
 
 ## Quick start
 
