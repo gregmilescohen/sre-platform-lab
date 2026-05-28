@@ -1,0 +1,10 @@
+# Services added incrementally per task:
+# Task 2:  prometheus, grafana, loki, alloy, alertmanager
+# Task 3:  postgres, pubsub-emulator, pubsub-setup, pulseboard-api
+# Task 4:  pulseboard-worker
+# Task 5:  pulseboard-consumer
+# Task 6:  pulseboard-ui
+# Task 7:  otel-collector, tempo
+# Task 12: sre-agent
+
+services: {}
