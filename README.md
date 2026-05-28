@@ -1,0 +1,54 @@
+# sre-platform-lab
+
+A hands-on SRE portfolio project demonstrating reliability engineering, observability,
+chaos engineering, and AI-assisted incident response — no LLM subscription required.
+
+## What's here
+
+**PulseBoard** — a small event-processing app (API, worker, consumer, React UI) instrumented
+with Prometheus RED metrics, structured logs (Loki), and OpenTelemetry traces. It has
+intentional failure modes baked in.
+
+**Observability stack** — Prometheus, Grafana, Loki, Alertmanager, Grafana Tempo.
+Pre-provisioned dashboards and SLO burn-rate alerts.
+
+**Chaos engineering** — One-command failure injection: elevated error rates, artificial latency.
+Triggers real SLO alerts.
+
+**SRE AI agent** — Webhook-triggered FastAPI service. When Alertmanager fires, the agent spawns
+[OpenCode](https://opencode.ai) with BigPickle (free) as the LLM. OpenCode uses MCP tools
+(Grafana MCP for metrics/logs, Alertmanager MCP for alert operations) to investigate the root
+cause and remediate — no human required.
+
+## Quick start
+
+```bash
+# Requires: Docker, docker compose
+cp .env.example .env
+docker compose up -d
+make urls
+```
+
+## Full incident demo
+
+```bash
+make chaos-errors           # trigger 50% error rate
+# → alert fires in ~2 min → sre-agent auto-diagnoses and resets chaos
+open http://localhost:8090  # watch agent sessions
+```
+
+## Services
+
+| Service | URL | Notes |
+|---------|-----|-------|
+| PulseBoard UI | http://localhost:5173 | Live event rate dashboard |
+| PulseBoard API | http://localhost:8080 | FastAPI, /docs for Swagger |
+| Grafana | http://localhost:3000 | admin / admin |
+| Prometheus | http://localhost:9090 | |
+| Alertmanager | http://localhost:9093 | |
+| SRE Agent | http://localhost:8090 | Agent session dashboard |
+
+## Design decisions
+
+See [docs/design-decisions.md](docs/design-decisions.md) for write-ups on: why burn-rate alerts
+over threshold alerts, why OpenCode over a custom agent framework, the SLO error budget math, etc.
