@@ -6,3 +6,5 @@
 # Task 6:  pulseboard-ui
 # Task 7:  otel-collector, tempo
 # Task 12: sre-agent
+
+services: {}

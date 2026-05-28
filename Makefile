@@ -11,6 +11,7 @@ help: ## Show available commands
 .PHONY: up
 up: ## Start all services and open dashboards in browser
 	docker compose up -d
+	@echo "Waiting for services to become available..."
 	@sleep 3
 	$(MAKE) open
 
@@ -42,6 +43,8 @@ status: ## Show container status
 logs: ## Tail all service logs
 	docker compose logs -f
 
+# NOTE: these targets require service directories to be populated by later tasks.
+# Running make test or make lint before Tasks 3-5 and 11 are complete will fail.
 .PHONY: test
 test: ## Run all service tests
 	cd apps/pulseboard-api && make test
@@ -49,6 +52,8 @@ test: ## Run all service tests
 	cd apps/pulseboard-consumer && make test
 	cd sre-agent && make test
 
+# NOTE: these targets require service directories to be populated by later tasks.
+# Running make test or make lint before Tasks 3-5 and 11 are complete will fail.
 .PHONY: lint
 lint: ## Run all service linters
 	cd apps/pulseboard-api && make lint

@@ -12,3 +12,8 @@ node_modules/
 .DS_Store
 *.pem
 *.key
+*.log
+junit*.xml
+coverage.xml
+.idea/
+.vscode/
