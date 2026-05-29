@@ -28,9 +28,10 @@ def test_publish_batch_calls_publisher_per_event() -> None:
     mock_publisher = MagicMock()
     mock_publisher.publish.return_value.result.return_value = "msg-id"
 
-    publish_batch(mock_publisher, "projects/p/topics/t", batch_size=3)
+    result = publish_batch(mock_publisher, "projects/p/topics/t", batch_size=3)
 
     assert mock_publisher.publish.call_count == 3
+    assert result == 3
 
 
 def test_publish_batch_encodes_as_json_bytes() -> None:

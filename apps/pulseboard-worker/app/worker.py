@@ -94,17 +94,18 @@ def run() -> None:
     project_id = os.getenv("PUBSUB_PROJECT_ID", "pulseboard")
     topic_id = os.getenv("PUBSUB_TOPIC_ID", "pulseboard-events")
 
-    publisher = pubsub_v1.PublisherClient()
-    topic_path = publisher.topic_path(project_id, topic_id)
+    with pubsub_v1.PublisherClient() as publisher:
+        topic_path = publisher.topic_path(project_id, topic_id)
+        logger.info(
+            "Worker started. interval=%.1fs batch=%d topic=%s",
+            interval,
+            batch_size,
+            topic_path,
+        )
 
-    logger.info(
-        "Worker started. interval=%.1fs batch=%d topic=%s",
-        interval,
-        batch_size,
-        topic_path,
-    )
-
-    while True:
-        published = publish_batch(publisher, topic_path, batch_size=batch_size)
-        logger.info("Published %d events", published)
-        time.sleep(interval)
+        while True:
+            published = publish_batch(publisher, topic_path, batch_size=batch_size)
+            logger.info("Published %d events", published)
+            # Touch heartbeat file for Docker HEALTHCHECK
+            open("/tmp/worker.heartbeat", "w").close()
+            time.sleep(interval)
