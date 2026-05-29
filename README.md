@@ -46,6 +46,8 @@ open http://localhost:8090  # watch agent sessions
 | Grafana | http://localhost:3000 | admin / admin |
 | Prometheus | http://localhost:9090 | |
 | Alertmanager | http://localhost:9093 | |
+| Loki | http://localhost:3100 | Query logs via Grafana |
+| Alloy UI | http://localhost:12345 | Log collector pipeline |
 | SRE Agent | http://localhost:8090 | Agent session dashboard |
 
 ## Design decisions

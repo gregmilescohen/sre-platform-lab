@@ -15,7 +15,7 @@ Alertmanager alerts using OpenCode with BigPickle (free LLM, no subscription req
 | `apps/pulseboard-consumer/` | Pub/Sub consumer → writes to event_log (Postgres), exposes Prometheus metrics on :9102 |
 | `apps/pulseboard-ui/` | React + Vite dashboard showing live event rate |
 | `sre-agent/` | Webhook-triggered FastAPI service — spawns OpenCode on alert |
-| `infra/` | Prometheus, Grafana, Loki, Alloy, Alertmanager, Tempo configs |
+| `infra/` | Prometheus, Grafana, Loki, Alloy, Alertmanager, Tempo configs — operational from Task 2 |
 | `chaos/` | Failure-injection scripts |
 | `runbooks/` | SLO runbooks |
 
@@ -69,6 +69,10 @@ Alertmanager → POST /webhook → sre-agent FastAPI
         └── OpenCode can also: POST /chaos/reset via bash if chaos detected
     → Python monitor.py polls Alertmanager for resolution
 ```
+
+## Current State
+
+Task 2 complete — observability stack operational (Prometheus, Grafana, Loki, Alloy, Alertmanager).
 
 ## Conventions
 
