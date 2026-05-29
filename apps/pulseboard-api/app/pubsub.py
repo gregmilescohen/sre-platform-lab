@@ -9,6 +9,7 @@ Environment variables:
   PUBSUB_TOPIC_ID       default: pulseboard-events
 """
 
+import functools
 import json
 import os
 from datetime import UTC, datetime
@@ -16,8 +17,9 @@ from datetime import UTC, datetime
 from google.cloud import pubsub_v1
 
 
+@functools.lru_cache(maxsize=1)
 def get_publisher() -> pubsub_v1.PublisherClient:
-    """Create a Pub/Sub publisher client.
+    """Return the application-scoped Pub/Sub publisher client (singleton).
 
     The client automatically connects to the emulator when PUBSUB_EMULATOR_HOST is set.
     Used as a FastAPI dependency so it can be overridden in tests.
