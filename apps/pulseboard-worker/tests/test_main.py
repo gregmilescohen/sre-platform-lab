@@ -16,6 +16,10 @@ def test_main_module_configures_logging() -> None:
 
 def test_main_calls_run_when_executed_as_dunder_main() -> None:
     """Running app.main as __main__ invokes worker.run()."""
+    import sys
+
+    # runpy warns if the module is already in sys.modules; clear it first
+    sys.modules.pop("app.main", None)
     with patch("app.worker.run") as mock_run:
         runpy.run_module("app.main", run_name="__main__")
     mock_run.assert_called_once()

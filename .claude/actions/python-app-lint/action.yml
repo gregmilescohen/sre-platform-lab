@@ -1,0 +1,24 @@
+name: Python App Lint
+description: Ruff lint and format check for a Python app in the monorepo.
+
+inputs:
+  working-directory:
+    description: Path to the app relative to the repo root (e.g., apps/pulseboard-api)
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - uses: astral-sh/setup-uv@v4
+
+    - name: Install dependencies
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: uv sync --group dev
+
+    - name: Lint
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        uv run ruff check .
+        uv run ruff format --check .

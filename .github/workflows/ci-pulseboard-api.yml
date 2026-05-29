@@ -12,15 +12,11 @@ jobs:
   lint:
     name: lint
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/pulseboard-api
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v4
-      - run: uv sync --group dev
-      - run: uv run ruff check .
-      - run: uv run ruff format --check .
+      - uses: ./.claude/actions/python-app-lint
+        with:
+          working-directory: apps/pulseboard-api
 
   test:
     name: test
@@ -28,24 +24,10 @@ jobs:
     permissions:
       checks: write
       contents: read
-    defaults:
-      run:
-        working-directory: apps/pulseboard-api
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v4
-      - run: uv sync --group dev
-      - run: uv run pytest tests/ -v --junitxml=junit.xml --cov=app --cov-report=xml
-      - uses: dorny/test-reporter@v1
-        if: always()
+      - uses: ./.claude/actions/python-app-test
         with:
-          name: pulseboard-api tests
-          path: apps/pulseboard-api/junit.xml
-          reporter: java-junit
-      - uses: codecov/codecov-action@v4
-        if: always()
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: apps/pulseboard-api/coverage.xml
-          flags: pulseboard-api
-          fail_ci_if_error: false
+          app-name: pulseboard-api
+          working-directory: apps/pulseboard-api
+          codecov-token: ${{ secrets.CODECOV_TOKEN }}

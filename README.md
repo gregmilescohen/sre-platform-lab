@@ -36,6 +36,20 @@ docker compose up -d
 make urls
 ```
 
+## Full stack
+
+```bash
+# Start all services
+make up
+
+# Tail logs for a specific service
+docker compose logs pulseboard-worker -f
+
+# Check service health
+make status
+make urls
+```
+
 ## Full incident demo
 
 ```bash

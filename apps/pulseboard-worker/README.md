@@ -62,8 +62,4 @@ docker run \
 
 ## Full stack
 
-```bash
-# From repo root — starts emulator, setup, and worker together
-docker compose up -d pulseboard-worker
-docker compose logs pulseboard-worker -f
-```
+See the [repo root README](../../README.md) for running the full stack.
