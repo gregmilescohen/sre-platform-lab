@@ -11,6 +11,9 @@ on:
 jobs:
   ci:
     uses: ./.github/workflows/python-app-ci.yml
+    permissions:
+      checks: write
+      contents: read
     with:
       app-name: pulseboard-worker
       working-directory: apps/pulseboard-worker
