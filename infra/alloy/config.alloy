@@ -15,6 +15,13 @@ discovery.relabel "docker_logs" {
     source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
     target_label  = "service"
   }
+
+  // Drop Alloy's own logs to prevent a self-logging feedback loop
+  rule {
+    source_labels = ["container"]
+    regex         = "alloy"
+    action        = "drop"
+  }
 }
 
 loki.source.docker "default" {

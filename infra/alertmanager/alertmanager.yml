@@ -10,4 +10,6 @@ route:
 
 receivers:
   - name: default
-    # sre-agent webhook receiver added in Task 12
+    # Intentionally empty — alerts are silently dropped until the sre-agent
+    # webhook receiver is added in Task 12.
+    webhook_configs: []
