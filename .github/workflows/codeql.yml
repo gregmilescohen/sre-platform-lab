@@ -22,7 +22,7 @@ jobs:
         language: [python]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
@@ -30,7 +30,7 @@ jobs:
           languages: ${{ matrix.language }}
           queries: security-extended
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         if: matrix.language == 'python'
         with:
           python-version: "3.13"
