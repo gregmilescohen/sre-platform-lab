@@ -14,8 +14,6 @@ select = [
     "B",    # flake8-bugbear
 ]
 ignore = [
-    "ANN101",  # missing type for `self`
-    "ANN102",  # missing type for `cls`
     "D100",    # missing module docstring
     "D104",    # missing package docstring
     "D107",    # missing __init__ docstring
