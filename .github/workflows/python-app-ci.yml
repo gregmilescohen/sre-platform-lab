@@ -1,0 +1,58 @@
+name: Python App CI
+
+on:
+  workflow_call:
+    inputs:
+      app-name:
+        description: App name — used for test report labels and Codecov flags (e.g., pulseboard-api)
+        required: true
+        type: string
+      working-directory:
+        description: Path to the app relative to the repo root (e.g., apps/pulseboard-api)
+        required: true
+        type: string
+    secrets:
+      codecov-token:
+        required: true
+
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+      - run: uv sync --group dev
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+      contents: read
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+      - run: uv sync --group dev
+      - run: uv run pytest tests/ -v --junitxml=junit.xml --cov=app --cov-report=xml
+      - uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: ${{ inputs.app-name }} tests
+          path: ${{ inputs.working-directory }}/junit.xml
+          reporter: java-junit
+      - uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          token: ${{ secrets.codecov-token }}
+          files: ${{ inputs.working-directory }}/coverage.xml
+          flags: ${{ inputs.app-name }}
+          fail_ci_if_error: false

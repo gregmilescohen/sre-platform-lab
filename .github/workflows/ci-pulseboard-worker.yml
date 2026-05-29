@@ -9,25 +9,10 @@ on:
     paths: ["apps/pulseboard-worker/**"]
 
 jobs:
-  lint:
-    name: lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.claude/actions/python-app-lint
-        with:
-          working-directory: apps/pulseboard-worker
-
-  test:
-    name: test
-    runs-on: ubuntu-latest
-    permissions:
-      checks: write
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.claude/actions/python-app-test
-        with:
-          app-name: pulseboard-worker
-          working-directory: apps/pulseboard-worker
-          codecov-token: ${{ secrets.CODECOV_TOKEN }}
+  ci:
+    uses: ./.github/workflows/python-app-ci.yml
+    with:
+      app-name: pulseboard-worker
+      working-directory: apps/pulseboard-worker
+    secrets:
+      codecov-token: ${{ secrets.CODECOV_TOKEN }}
