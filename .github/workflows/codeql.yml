@@ -18,7 +18,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [python, javascript-typescript]
+        # javascript-typescript added in Task 6 when pulseboard-ui lands
+        language: [python]
 
     steps:
       - uses: actions/checkout@v4
@@ -28,6 +29,11 @@ jobs:
         with:
           languages: ${{ matrix.language }}
           queries: security-extended
+
+      - uses: actions/setup-python@v5
+        if: matrix.language == 'python'
+        with:
+          python-version: "3.13"
 
       - name: Autobuild
         uses: github/codeql-action/autobuild@v3
