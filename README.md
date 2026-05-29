@@ -1,7 +1,5 @@
 # sre-platform-lab
 
-[![pulseboard-api tests](https://github.com/gregmilescohen/sre-platform-lab/actions/workflows/ci-pulseboard-api.yml/badge.svg)](https://github.com/gregmilescohen/sre-platform-lab/actions/workflows/ci-pulseboard-api.yml)
-[![pulseboard-api coverage](https://codecov.io/gh/gregmilescohen/sre-platform-lab/branch/main/graph/badge.svg?flag=pulseboard-api)](https://codecov.io/gh/gregmilescohen/sre-platform-lab)
 [![CodeQL](https://github.com/gregmilescohen/sre-platform-lab/actions/workflows/codeql.yml/badge.svg)](https://github.com/gregmilescohen/sre-platform-lab/actions/workflows/codeql.yml)
 
 My "SRE lab" for testing out new ideas and approaches related to reliability engineering, observability, chaos engineering, and agentic incident response — where a real AI agent spins up on alert, diagnoses the issue, reasons through it, and applies a fix.
@@ -11,6 +9,11 @@ My "SRE lab" for testing out new ideas and approaches related to reliability eng
 **PulseBoard** — a small event-processing app (API, worker, consumer, React UI) instrumented
 with Prometheus RED metrics, structured logs (Loki), and OpenTelemetry traces. It has
 intentional failure modes baked in.
+
+| app | test results | test coverage |
+|---|---|---|
+| `pulseboard-api` | [![tests](https://github.com/gregmilescohen/sre-platform-lab/actions/workflows/ci-pulseboard-api.yml/badge.svg)](https://github.com/gregmilescohen/sre-platform-lab/actions/workflows/ci-pulseboard-api.yml) | [![coverage](https://codecov.io/gh/gregmilescohen/sre-platform-lab/branch/main/graph/badge.svg?flag=pulseboard-api)](https://codecov.io/gh/gregmilescohen/sre-platform-lab) |
+| `pulseboard-worker` | [![pulseboard-worker tests](https://github.com/gregmilescohen/sre-platform-lab/actions/workflows/ci-pulseboard-worker.yml/badge.svg)](https://github.com/gregmilescohen/sre-platform-lab/actions/workflows/ci-pulseboard-worker.yml) | [![pulseboard-worker coverage](https://codecov.io/gh/gregmilescohen/sre-platform-lab/branch/main/graph/badge.svg?flag=pulseboard-worker)](https://codecov.io/gh/gregmilescohen/sre-platform-lab) |
 
 **Observability stack** — Prometheus, Grafana, Loki, Alertmanager, Grafana Tempo.
 Pre-provisioned dashboards and SLO burn-rate alerts.
@@ -30,6 +33,20 @@ run this without an API key or LLM subscription.
 # Requires: Docker, docker compose
 cp .env.example .env
 docker compose up -d
+make urls
+```
+
+## Full stack
+
+```bash
+# Start all services
+make up
+
+# Tail logs for a specific service
+docker compose logs pulseboard-worker -f
+
+# Check service health
+make status
 make urls
 ```
 

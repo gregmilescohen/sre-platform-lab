@@ -173,6 +173,22 @@ services:
         condition: service_completed_successfully
     restart: unless-stopped
 
+  pulseboard-worker:
+    build:
+      context: ./apps/pulseboard-worker
+      dockerfile: Dockerfile
+    container_name: pulseboard-worker
+    environment:
+      PUBSUB_EMULATOR_HOST: pubsub-emulator:8085
+      PUBSUB_PROJECT_ID: pulseboard
+      PUBSUB_TOPIC_ID: pulseboard-events
+      PUBLISH_INTERVAL_SECONDS: "1.0"
+      BATCH_SIZE: "5"
+    depends_on:
+      pubsub-setup:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
 volumes:
   prometheus-data:
   grafana-data:

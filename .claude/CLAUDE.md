@@ -11,7 +11,7 @@ Alertmanager alerts using OpenCode with BigPickle (free LLM, no subscription req
 | Directory | Purpose |
 |-----------|---------|
 | `apps/pulseboard-api/` | FastAPI backend — POST /events (emit), GET /events (read), RED metrics, chaos endpoints |
-| `apps/pulseboard-worker/` | Synthetic event publisher (Pub/Sub) |
+| `apps/pulseboard-worker/` | Synthetic event generator — publishes randomised events to Pub/Sub at configurable rate; env vars: `PUBLISH_INTERVAL_SECONDS`, `BATCH_SIZE` |
 | `apps/pulseboard-consumer/` | Pub/Sub consumer → writes to event_log (Postgres), exposes Prometheus metrics on :9102 |
 | `apps/pulseboard-ui/` | React + Vite dashboard showing live event rate |
 | `sre-agent/` | Webhook-triggered FastAPI service — spawns OpenCode on alert |
@@ -72,7 +72,7 @@ Alertmanager → POST /webhook → sre-agent FastAPI
 
 ## Current State
 
-Task 3 complete — pulseboard-api operational. Endpoints: POST /events, GET /events, GET /health, GET /metrics.
+Task 4 complete — pulseboard-worker operational. Publishes 5 synthetic events/second to the pulseboard-events Pub/Sub topic.
 
 ## Conventions
 
