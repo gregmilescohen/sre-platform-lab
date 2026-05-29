@@ -32,8 +32,8 @@ run: ## Run the API locally with hot reload on port 8080
 	uv run uvicorn app.main:app --reload --port 8080
 
 .PHONY: test
-test: ## Run unit tests with pytest
-	uv run pytest tests/ -v
+test: ## Run unit tests with pytest (outputs junit.xml)
+	uv run pytest tests/ -v --junitxml=junit.xml
 
 .PHONY: test-cov
 test-cov: ## Run tests with coverage report

@@ -1,24 +1,17 @@
 # pulseboard-api
 
-## What This Repo Is
+## What This App Is
 
-FastAPI backend service for the PulseBoard demo workload in the Reliability Lab. Publishes
-events to a Pub/Sub topic (`POST /events`), and reads aggregated event data from the `event_log`
-table for the UI (`GET /events`). Also exposes a health probe and Prometheus RED metrics.
+FastAPI backend for PulseBoard. Lives at `apps/pulseboard-api/` inside the `sre-platform-lab`
+monorepo. Publishes events to a Pub/Sub topic (`POST /events`), reads aggregated event data
+from the `event_log` table for the UI (`GET /events`), exposes a health probe and Prometheus
+RED metrics.
 
-## Repo Ecosystem
-
-| Repo | Purpose |
-|------|---------|
-| reliability-lab-bootstrap | Environment lifecycle — builds and deploys this service |
-| reliability-lab-infra | Base Helm chart (`reliability-lab-chart`) used by this service |
-| **pulseboard-api** (this repo) | Emits events to Pub/Sub; serves event data to UI |
-| pulseboard-consumer | Reads from Pub/Sub topic, writes to event_log |
-| pulseboard-ui | Frontend showing system health charts |
+See the repo-root `.claude/CLAUDE.md` for the full ecosystem overview.
 
 ## Tech Stack
 
-- **Python 3.12** — `.python-version` file present
+- **Python 3.13** — `.python-version` file present
 - **uv** — package and virtual environment management
 - **FastAPI** — web framework
 - **SQLAlchemy 2.0** — ORM (sync)
@@ -33,7 +26,7 @@ table for the UI (`GET /events`). Also exposes a health probe and Prometheus RED
 ## Directory Structure
 
 ```
-pulseboard-api/
+apps/pulseboard-api/
 ├── app/
 │   ├── main.py          # FastAPI app, metrics middleware, /metrics endpoint
 │   ├── db.py            # Engine, SessionLocal, Base, get_db dependency
@@ -42,17 +35,11 @@ pulseboard-api/
 │   ├── metrics.py       # RED metrics: requests_total counter + duration histogram
 │   ├── pubsub.py        # get_publisher(), publish_event(), get_topic_path()
 │   └── routers/
-│       ├── health.py    # GET /health
+│       ├── health.py    # GET /health — returns 503 when DB is down
 │       └── events.py    # POST /events (emit), GET /events (data)
 ├── tests/
 │   ├── test_health.py   # Unit tests for health endpoint
 │   └── test_events.py   # Unit tests for emit + get + bucketing logic
-├── k8s/
-│   ├── namespace.yaml        # pulseboard Namespace
-│   ├── postgres.yaml         # PostgreSQL 15 Deployment + Service + PVC
-│   └── pubsub-emulator.yaml  # Pub/Sub Emulator Deployment + Service
-├── helm/
-│   └── values.yaml      # NodePort 30080, HPA enabled, ServiceMonitor
 ├── Dockerfile
 ├── Makefile
 └── pyproject.toml
@@ -143,5 +130,5 @@ with `unittest.mock.MagicMock()`. No database or running server is required.
 - `app/pubsub.py` wraps the Pub/Sub client — mock `publish_event` in tests
 - `_bucket_events()` in `app/routers/events.py` is a pure function — test it without mocks
 - All tests use `unittest.mock`; keep them as pure unit tests (no real DB or broker)
-- Run `make lint` before committing — ruff enforces style (line-length 100, py312 target)
+- Run `make lint` before committing — ruff config lives at repo root `ruff.toml` (line-length 100, py313 target)
 - `event_log.event_metadata` is the Python attribute; DB column is `metadata`
