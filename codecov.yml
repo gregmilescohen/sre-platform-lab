@@ -1,0 +1,23 @@
+flags:
+  pulseboard-api:
+    paths:
+      - apps/pulseboard-api/app/
+  pulseboard-worker:
+    paths:
+      - apps/pulseboard-worker/app/
+  pulseboard-consumer:
+    paths:
+      - apps/pulseboard-consumer/app/
+  pulseboard-ui:
+    paths:
+      - apps/pulseboard-ui/src/
+  sre-agent:
+    paths:
+      - sre-agent/agent/
+
+coverage:
+  status:
+    patch:
+      default:
+        target: auto
+        threshold: 5%

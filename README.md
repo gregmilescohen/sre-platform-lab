@@ -1,6 +1,7 @@
 # sre-platform-lab
 
-[![pulseboard-api CI](https://github.com/gregmilescohen/sre-platform-lab/actions/workflows/ci-pulseboard-api.yml/badge.svg)](https://github.com/gregmilescohen/sre-platform-lab/actions/workflows/ci-pulseboard-api.yml)
+[![pulseboard-api tests](https://github.com/gregmilescohen/sre-platform-lab/actions/workflows/ci-pulseboard-api.yml/badge.svg)](https://github.com/gregmilescohen/sre-platform-lab/actions/workflows/ci-pulseboard-api.yml)
+[![pulseboard-api coverage](https://codecov.io/gh/gregmilescohen/sre-platform-lab/branch/main/graph/badge.svg?flag=pulseboard-api)](https://codecov.io/gh/gregmilescohen/sre-platform-lab)
 [![CodeQL](https://github.com/gregmilescohen/sre-platform-lab/actions/workflows/codeql.yml/badge.svg)](https://github.com/gregmilescohen/sre-platform-lab/actions/workflows/codeql.yml)
 
 My "SRE lab" for testing out new ideas and approaches related to reliability engineering, observability, chaos engineering, and agentic incident response — where a real AI agent spins up on alert, diagnoses the issue, reasons through it, and applies a fix.
