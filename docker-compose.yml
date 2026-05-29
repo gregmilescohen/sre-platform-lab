@@ -101,7 +101,80 @@ services:
       retries: 5
     restart: unless-stopped
 
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_USER: pulseboard
+      POSTGRES_PASSWORD: pulseboard
+      POSTGRES_DB: pulseboard
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pulseboard"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  pubsub-emulator:
+    image: gcr.io/google.com/cloudsdktool/google-cloud-cli:emulators
+    container_name: pubsub-emulator
+    command:
+      - gcloud
+      - beta
+      - emulators
+      - pubsub
+      - start
+      - --host-port=0.0.0.0:8085
+      - --project=pulseboard
+    ports:
+      - "8085:8085"
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8085"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+    restart: unless-stopped
+
+  pubsub-setup:
+    image: curlimages/curl:8.7.1
+    container_name: pubsub-setup
+    depends_on:
+      pubsub-emulator:
+        condition: service_healthy
+    command:
+      - sh
+      - -c
+      - |
+        curl -sf -X PUT "http://pubsub-emulator:8085/v1/projects/pulseboard/topics/pulseboard-events" || true
+        curl -sf -X PUT "http://pubsub-emulator:8085/v1/projects/pulseboard/subscriptions/pulseboard-events-sub" \
+          -H "Content-Type: application/json" \
+          -d '{"topic":"projects/pulseboard/topics/pulseboard-events"}' || true
+        echo "Pub/Sub setup complete."
+    restart: "no"
+
+  pulseboard-api:
+    build:
+      context: ./apps/pulseboard-api
+      dockerfile: Dockerfile
+    container_name: pulseboard-api
+    ports:
+      - "8080:8080"
+    environment:
+      DATABASE_URL: postgresql://pulseboard:pulseboard@postgres:5432/pulseboard
+      PUBSUB_EMULATOR_HOST: pubsub-emulator:8085
+      PUBSUB_PROJECT_ID: pulseboard
+      PUBSUB_TOPIC_ID: pulseboard-events
+    depends_on:
+      postgres:
+        condition: service_healthy
+      pubsub-setup:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
 volumes:
   prometheus-data:
   grafana-data:
   loki-data:
+  postgres-data:

@@ -72,7 +72,7 @@ Alertmanager → POST /webhook → sre-agent FastAPI
 
 ## Current State
 
-Task 2 complete — observability stack operational (Prometheus, Grafana, Loki, Alloy, Alertmanager).
+Task 3 complete — pulseboard-api operational. Endpoints: POST /events, GET /events, GET /health, GET /metrics.
 
 ## Conventions
 

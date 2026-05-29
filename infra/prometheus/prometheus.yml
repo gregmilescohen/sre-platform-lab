@@ -18,3 +18,10 @@ scrape_configs:
   - job_name: grafana
     static_configs:
       - targets: [grafana:3000]
+
+  - job_name: pulseboard-api
+    static_configs:
+      - targets: [pulseboard-api:8080]
+    relabel_configs:
+      - target_label: service
+        replacement: pulseboard-api
