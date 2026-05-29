@@ -24,7 +24,7 @@ jobs:
         working-directory: ${{ inputs.working-directory }}
     steps:
       - uses: actions/checkout@v6
-      - uses: astral-sh/setup-uv@v8
+      - uses: astral-sh/setup-uv@v8.1.0
       - run: uv sync --group dev
       - run: uv run ruff check .
       - run: uv run ruff format --check .
@@ -40,7 +40,7 @@ jobs:
         working-directory: ${{ inputs.working-directory }}
     steps:
       - uses: actions/checkout@v6
-      - uses: astral-sh/setup-uv@v8
+      - uses: astral-sh/setup-uv@v8.1.0
       - run: uv sync --group dev
       - run: uv run pytest tests/ -v --junitxml=junit.xml --cov=app --cov-report=xml
       - uses: dorny/test-reporter@v3
