@@ -1,7 +1,6 @@
 # pulseboard-api
 
-FastAPI backend for the PulseBoard demo workload. Publishes events to a Google Pub/Sub topic
-and reads time-bucketed event data from Postgres for the UI charts. Exposes Prometheus RED metrics.
+FastAPI backend for the PulseBoard demo workload. Publishes events to a Google Pub/Sub topic and reads time-bucketed event data from Postgres for the UI charts. Exposes Prometheus RED metrics.
 
 ## Endpoints
 
