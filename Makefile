@@ -70,6 +70,7 @@ urls: ## Print all service endpoints
 	@echo "  PulseBoard API:       http://localhost:8080"
 	@echo "  PulseBoard UI:        http://localhost:5173"
 	@echo "  SRE Agent:            http://localhost:8090"
+	@echo "  Alloy (log pipeline): http://localhost:12345"
 	@echo "  Consumer metrics:     http://localhost:9102/metrics"
 	@echo ""
 	@echo "  Run 'make open' to open UI/Grafana/Alertmanager in browser tabs."
