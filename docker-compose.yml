@@ -189,6 +189,26 @@ services:
         condition: service_completed_successfully
     restart: unless-stopped
 
+  pulseboard-consumer:
+    build:
+      context: ./apps/pulseboard-consumer
+      dockerfile: Dockerfile
+    container_name: pulseboard-consumer
+    ports:
+      - "9102:9102"
+    environment:
+      DATABASE_URL: postgresql://pulseboard:pulseboard@postgres:5432/pulseboard
+      PUBSUB_EMULATOR_HOST: pubsub-emulator:8085
+      PUBSUB_PROJECT_ID: pulseboard
+      PUBSUB_SUBSCRIPTION_ID: pulseboard-events-sub
+      METRICS_PORT: "9102"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      pubsub-setup:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
 volumes:
   prometheus-data:
   grafana-data:

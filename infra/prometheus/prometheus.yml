@@ -25,3 +25,10 @@ scrape_configs:
     relabel_configs:
       - target_label: service
         replacement: pulseboard-api
+
+  - job_name: pulseboard-consumer
+    static_configs:
+      - targets: [pulseboard-consumer:9102]
+    relabel_configs:
+      - target_label: service
+        replacement: pulseboard-consumer

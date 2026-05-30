@@ -1,0 +1,21 @@
+name: pulseboard-consumer CI
+
+on:
+  push:
+    branches: [main]
+    paths: ["apps/pulseboard-consumer/**"]
+  pull_request:
+    branches: [main]
+    paths: ["apps/pulseboard-consumer/**"]
+
+jobs:
+  ci:
+    uses: ./.github/workflows/python-app-ci.yml
+    permissions:
+      checks: write
+      contents: read
+    with:
+      app-name: pulseboard-consumer
+      working-directory: apps/pulseboard-consumer
+    secrets:
+      codecov-token: ${{ secrets.CODECOV_TOKEN }}
