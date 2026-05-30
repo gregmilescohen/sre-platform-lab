@@ -156,8 +156,8 @@ services:
 
   pulseboard-api:
     build:
-      context: ./apps/pulseboard-api
-      dockerfile: Dockerfile
+      context: ./apps
+      dockerfile: pulseboard-api/Dockerfile
     container_name: pulseboard-api
     ports:
       - "8080:8080"
@@ -191,8 +191,8 @@ services:
 
   pulseboard-consumer:
     build:
-      context: ./apps/pulseboard-consumer
-      dockerfile: Dockerfile
+      context: ./apps
+      dockerfile: pulseboard-consumer/Dockerfile
     container_name: pulseboard-consumer
     ports:
       - "9102:9102"

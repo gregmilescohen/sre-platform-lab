@@ -1,12 +1,12 @@
-name: pulseboard-api CI
+name: pulseboard-shared CI
 
 on:
   push:
     branches: [main]
-    paths: ["apps/pulseboard-api/**", "apps/lib/**"]
+    paths: ["apps/lib/**"]
   pull_request:
     branches: [main]
-    paths: ["apps/pulseboard-api/**", "apps/lib/**"]
+    paths: ["apps/lib/**"]
 
 jobs:
   ci:
@@ -15,7 +15,7 @@ jobs:
       checks: write
       contents: read
     with:
-      app-name: pulseboard-api
-      working-directory: apps/pulseboard-api
+      app-name: pulseboard-shared
+      working-directory: apps/lib
     secrets:
       codecov-token: ${{ secrets.CODECOV_TOKEN }}

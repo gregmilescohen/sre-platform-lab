@@ -1,9 +1,11 @@
-"""Database engine, session factory, and base model class."""
+"""Database engine, session factory, and ORM base."""
 
 import os
+from collections.abc import Generator
 
+from pulseboard_shared.models import Base
 from sqlalchemy import create_engine
-from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
+from sqlalchemy.orm import Session, sessionmaker
 
 DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./pulseboard.db")
 
@@ -18,18 +20,12 @@ engine = create_engine(DATABASE_URL, connect_args=_connect_args)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-class Base(DeclarativeBase):
-    """SQLAlchemy declarative base for all ORM models."""
-
-
 def create_tables() -> None:
-    """Create all database tables defined in ORM models."""
-    from app.models import EventLog  # noqa: F401 — imported to register with metadata
-
+    """Create all database tables (idempotent)."""
     Base.metadata.create_all(bind=engine)
 
 
-def get_db() -> Session:
+def get_db() -> Generator[Session]:
     """FastAPI dependency that yields a DB session and closes it after the request."""
     db: Session = SessionLocal()
     try:

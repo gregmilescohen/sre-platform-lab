@@ -3,10 +3,10 @@ name: pulseboard-consumer CI
 on:
   push:
     branches: [main]
-    paths: ["apps/pulseboard-consumer/**"]
+    paths: ["apps/pulseboard-consumer/**", "apps/lib/**"]
   pull_request:
     branches: [main]
-    paths: ["apps/pulseboard-consumer/**"]
+    paths: ["apps/pulseboard-consumer/**", "apps/lib/**"]
 
 jobs:
   ci:

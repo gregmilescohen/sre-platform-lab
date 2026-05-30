@@ -1,13 +1,10 @@
-"""Database engine, session factory, and base model class.
-
-Identical pattern to pulseboard-api. The consumer uses the same database
-and writes to the event_log table created by the API on startup.
-"""
+"""Database engine, session factory, and ORM base."""
 
 import os
 
+from pulseboard_shared.models import Base
 from sqlalchemy import create_engine
-from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
+from sqlalchemy.orm import Session, sessionmaker
 
 DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./pulseboard-consumer.db")
 
@@ -22,14 +19,8 @@ engine = create_engine(DATABASE_URL, connect_args=_connect_args)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-class Base(DeclarativeBase):
-    """Base class for SQLAlchemy ORM models."""
-
-
 def create_tables() -> None:
-    """Create all tables in the database (idempotent)."""
-    from app.models import EventLog  # noqa: F401 — imported to register with metadata
-
+    """Create all database tables (idempotent)."""
     Base.metadata.create_all(bind=engine)
 
 
