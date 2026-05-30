@@ -85,33 +85,34 @@ def run_subscriber() -> None:
     with pubsub_v1.SubscriberClient() as subscriber:
         while True:
             try:
-                response = subscriber.pull(
-                    request={
-                        "subscription": subscription_path,
-                        "max_messages": _BATCH_SIZE,
-                    },
-                    timeout=30,
-                )
-            except Exception as exc:
-                logger.error("Pull failed: %s", exc)
-                time.sleep(_BATCH_TIMEOUT)
-                continue  # pragma: no cover
+                try:
+                    response = subscriber.pull(
+                        request={
+                            "subscription": subscription_path,
+                            "max_messages": _BATCH_SIZE,
+                        },
+                        timeout=30,
+                    )
+                except Exception as exc:
+                    logger.error("Pull failed: %s", exc)
+                    time.sleep(_BATCH_TIMEOUT)
+                    continue  # pragma: no cover
 
-            if not response.received_messages:
-                time.sleep(_BATCH_TIMEOUT)
-                continue  # pragma: no cover
+                if not response.received_messages:
+                    time.sleep(_BATCH_TIMEOUT)
+                    continue  # pragma: no cover
 
-            db = get_db()
-            try:
-                to_ack = process_batch(response.received_messages, db)
+                db = get_db()
+                try:
+                    to_ack = process_batch(response.received_messages, db)
+                finally:
+                    db.close()
+
+                ack_ids = [m.ack_id for m in to_ack]
+                if ack_ids:
+                    subscriber.acknowledge(
+                        request={"subscription": subscription_path, "ack_ids": ack_ids}
+                    )
+                    logger.debug("Acked %d message(s)", len(ack_ids))
             finally:
-                db.close()
-
-            ack_ids = [m.ack_id for m in to_ack]
-            if ack_ids:
-                subscriber.acknowledge(
-                    request={"subscription": subscription_path, "ack_ids": ack_ids}
-                )
-                logger.debug("Acked %d message(s)", len(ack_ids))
-
-            open("/tmp/consumer.heartbeat", "w").close()
+                open("/tmp/consumer.heartbeat", "w").close()
