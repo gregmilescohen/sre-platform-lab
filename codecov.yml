@@ -1,4 +1,7 @@
 flags:
+  pulseboard-shared:
+    paths:
+      - apps/lib/pulseboard_shared/
   pulseboard-api:
     paths:
       - apps/pulseboard-api/app/

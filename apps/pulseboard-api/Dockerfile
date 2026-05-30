@@ -1,18 +1,18 @@
 FROM python:3.13-slim
 
-WORKDIR /app
-
-# Copy uv binary from official image
 COPY --from=ghcr.io/astral-sh/uv:0.7.8 /uv /usr/local/bin/uv
 
-# Copy dependency manifests first for layer caching
-COPY pyproject.toml uv.lock ./
+WORKDIR /app
 
-# Install production dependencies only
+# Shared lib must be available at ../lib for uv to resolve the path dependency
+COPY lib/ /lib/
+
+# App manifests
+COPY pulseboard-api/pyproject.toml pulseboard-api/uv.lock* ./
+
 RUN uv sync --frozen --no-dev --no-editable
 
-# Copy application code
-COPY app/ ./app/
+COPY pulseboard-api/app/ ./app/
 
 EXPOSE 8080
 

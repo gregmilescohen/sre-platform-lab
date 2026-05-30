@@ -11,6 +11,10 @@ on:
         description: Path to the app relative to the repo root (e.g., apps/pulseboard-api)
         required: true
         type: string
+      coverage-source:
+        description: Python package name to measure coverage for (defaults to app)
+        required: false
+        type: string
     secrets:
       codecov-token:
         required: true
@@ -25,6 +29,8 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: astral-sh/setup-uv@v8.1.0
+        with:
+          cache-suffix: -${{ inputs.app-name }}-${{ github.job }}
       - run: uv sync --group dev
       - run: uv run ruff check .
       - run: uv run ruff format --check .
@@ -41,8 +47,10 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: astral-sh/setup-uv@v8.1.0
+        with:
+          cache-suffix: -${{ inputs.app-name }}-${{ github.job }}
       - run: uv sync --group dev
-      - run: uv run pytest tests/ -v --junitxml=junit.xml --cov=app --cov-report=xml
+      - run: uv run pytest tests/ -v --junitxml=junit.xml --cov=${{ inputs.coverage-source || 'app' }} --cov-report=xml
       - uses: dorny/test-reporter@v3
         if: always()
         with:
