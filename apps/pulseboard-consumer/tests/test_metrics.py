@@ -20,3 +20,17 @@ def test_batch_size_metric_exists() -> None:
     from app.metrics import BATCH_SIZE
 
     assert BATCH_SIZE._name == "pulseboard_consumer_batch_size"
+
+
+def test_message_age_metric_exists() -> None:
+    """MESSAGE_AGE_SECONDS histogram has the correct metric name."""
+    from app.metrics import MESSAGE_AGE_SECONDS
+
+    assert MESSAGE_AGE_SECONDS._name == "pulseboard_consumer_message_age_seconds"
+
+
+def test_subscription_backlog_metric_exists() -> None:
+    """SUBSCRIPTION_BACKLOG gauge has the correct metric name."""
+    from app.metrics import SUBSCRIPTION_BACKLOG
+
+    assert SUBSCRIPTION_BACKLOG._name == "pulseboard_consumer_subscription_backlog_messages"

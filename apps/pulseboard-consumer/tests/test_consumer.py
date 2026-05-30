@@ -5,6 +5,7 @@ Session — no real broker or database is required.
 """
 
 import json
+from datetime import UTC, datetime, timedelta
 from unittest.mock import MagicMock
 
 import pytest
@@ -20,6 +21,7 @@ def make_message(
     event_name: str = "test_event",
     metadata: dict | None = None,
     ack_id: str = "ack-1",
+    age_seconds: float = 1.0,
 ) -> MagicMock:
     """Return a mock ReceivedMessage with a valid JSON payload."""
     payload = {"event_name": event_name, "metadata": metadata or {}}
@@ -27,6 +29,7 @@ def make_message(
     msg.ack_id = ack_id
     msg.message.message_id = f"msg-{ack_id}"
     msg.message.data = json.dumps(payload).encode("utf-8")
+    msg.message.publish_time = datetime.now(UTC) - timedelta(seconds=age_seconds)
     return msg
 
 
@@ -36,6 +39,7 @@ def make_bad_message(data: bytes = b"not json", ack_id: str = "ack-bad") -> Magi
     msg.ack_id = ack_id
     msg.message.message_id = f"msg-{ack_id}"
     msg.message.data = data
+    msg.message.publish_time = datetime.now(UTC) - timedelta(seconds=1.0)
     return msg
 
 
@@ -137,6 +141,41 @@ def test_process_batch_rows_are_eventlog_instances() -> None:
     process_batch(messages, mock_db)
     added_row = mock_db.add.call_args[0][0]
     assert isinstance(added_row, EventLog)
+
+
+def test_process_batch_observes_message_age() -> None:
+    """process_batch records message age for every message in the batch."""
+    from unittest.mock import patch
+
+    mock_db = MagicMock()
+    messages = [make_message("page_view", age_seconds=5.0)]
+    with patch("app.consumer.MESSAGE_AGE_SECONDS") as mock_age:
+        process_batch(messages, mock_db)
+    mock_age.observe.assert_called_once()
+    observed = mock_age.observe.call_args[0][0]
+    assert observed >= 0.0
+
+
+def test_process_batch_observes_age_for_malformed_messages() -> None:
+    """process_batch records message age even for malformed messages."""
+    from unittest.mock import patch
+
+    mock_db = MagicMock()
+    messages = [make_bad_message()]
+    with patch("app.consumer.MESSAGE_AGE_SECONDS") as mock_age:
+        process_batch(messages, mock_db)
+    mock_age.observe.assert_called_once()
+
+
+def test_process_batch_sets_subscription_backlog() -> None:
+    """process_batch updates SUBSCRIPTION_BACKLOG gauge with the batch length."""
+    from unittest.mock import patch
+
+    mock_db = MagicMock()
+    messages = [make_message("e1"), make_message("e2")]
+    with patch("app.consumer.SUBSCRIPTION_BACKLOG") as mock_backlog:
+        process_batch(messages, mock_db)
+    mock_backlog.set.assert_called_once_with(2)
 
 
 def test_process_batch_increments_ok_counter() -> None:

@@ -18,12 +18,19 @@ import json
 import logging
 import os
 import time
+from datetime import UTC, datetime
 
 from google.cloud import pubsub_v1
 from sqlalchemy.orm import Session
 
 from app.db import get_db
-from app.metrics import BATCH_SIZE, MESSAGES_PROCESSED, PROCESSING_DURATION
+from app.metrics import (
+    BATCH_SIZE,
+    MESSAGE_AGE_SECONDS,
+    MESSAGES_PROCESSED,
+    PROCESSING_DURATION,
+    SUBSCRIPTION_BACKLOG,
+)
 from app.models import EventLog
 
 logger = logging.getLogger(__name__)
@@ -50,8 +57,11 @@ def process_batch(
     poison pills from blocking the subscription. Decode errors are logged.
     """
     BATCH_SIZE.observe(len(messages))
+    SUBSCRIPTION_BACKLOG.set(len(messages))
+    now = datetime.now(UTC)
     rows = []
     for msg in messages:
+        MESSAGE_AGE_SECONDS.observe((now - msg.message.publish_time).total_seconds())
         with PROCESSING_DURATION.time():
             try:
                 payload = json.loads(msg.message.data.decode("utf-8"))
