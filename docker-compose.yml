@@ -209,6 +209,17 @@ services:
         condition: service_completed_successfully
     restart: unless-stopped
 
+  pulseboard-ui:
+    build:
+      context: ./apps/pulseboard-ui
+      dockerfile: Dockerfile
+    container_name: pulseboard-ui
+    ports:
+      - "5173:5173"
+    depends_on:
+      - pulseboard-api
+    restart: unless-stopped
+
 volumes:
   prometheus-data:
   grafana-data:

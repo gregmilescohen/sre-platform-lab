@@ -1,0 +1,58 @@
+name: pulseboard-ui CI
+
+on:
+  push:
+    branches: [main]
+    paths: ["apps/pulseboard-ui/**"]
+  pull_request:
+    branches: [main]
+    paths: ["apps/pulseboard-ui/**"]
+
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/pulseboard-ui
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/pulseboard-ui/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+      contents: read
+    defaults:
+      run:
+        working-directory: apps/pulseboard-ui
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/pulseboard-ui/package-lock.json
+      - run: npm ci
+      - run: npm run test:ci
+      - uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: pulseboard-ui tests
+          path: apps/pulseboard-ui/junit.xml
+          reporter: java-junit
+      - uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: apps/pulseboard-ui/coverage/lcov.info
+          flags: pulseboard-ui
+          fail_ci_if_error: false
