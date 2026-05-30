@@ -172,6 +172,15 @@ services:
       pubsub-setup:
         condition: service_completed_successfully
     restart: unless-stopped
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./apps/pulseboard-api/app
+          target: /app/app
+        - action: rebuild
+          path: ./apps/pulseboard-api/pyproject.toml
+        - action: rebuild
+          path: ./apps/pulseboard-api/uv.lock
 
   pulseboard-worker:
     build:
@@ -188,6 +197,15 @@ services:
       pubsub-setup:
         condition: service_completed_successfully
     restart: unless-stopped
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./apps/pulseboard-worker/app
+          target: /app/app
+        - action: rebuild
+          path: ./apps/pulseboard-worker/pyproject.toml
+        - action: rebuild
+          path: ./apps/pulseboard-worker/uv.lock
 
   pulseboard-consumer:
     build:
@@ -208,6 +226,34 @@ services:
       pubsub-setup:
         condition: service_completed_successfully
     restart: unless-stopped
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./apps/pulseboard-consumer/app
+          target: /app/app
+        - action: rebuild
+          path: ./apps/pulseboard-consumer/pyproject.toml
+        - action: rebuild
+          path: ./apps/pulseboard-consumer/uv.lock
+
+  pulseboard-ui:
+    build:
+      context: ./apps/pulseboard-ui
+      dockerfile: Dockerfile
+    container_name: pulseboard-ui
+    ports:
+      - "5173:5173"
+    depends_on:
+      - pulseboard-api
+    restart: unless-stopped
+    develop:
+      watch:
+        - action: rebuild
+          path: ./apps/pulseboard-ui/src
+        - action: rebuild
+          path: ./apps/pulseboard-ui/package.json
+        - action: rebuild
+          path: ./apps/pulseboard-ui/package-lock.json
 
 volumes:
   prometheus-data:

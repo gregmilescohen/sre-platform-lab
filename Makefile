@@ -9,11 +9,15 @@ help: ## Show available commands
 	@awk 'BEGIN {FS = ":.*##"} /^[a-zA-Z0-9_-]+:.*##/ { printf "  \033[36m%-24s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
 
 .PHONY: up
-up: ## Start all services and open dashboards in browser
-	docker compose up -d
+up: ## Start all services and open dashboards in browser (NO_CACHE=1 to force image rebuild)
+	$(if $(NO_CACHE),docker compose build --no-cache &&,) docker compose up -d
 	@echo "Waiting for services to become available..."
 	@sleep 3
 	$(MAKE) open
+
+.PHONY: watch
+watch: ## Start services and watch for code changes (live sync — no browser open)
+	docker compose watch
 
 .PHONY: open
 open: ## Open PulseBoard UI, Grafana, and Alertmanager in browser tabs

@@ -18,8 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # javascript-typescript added in Task 6 when pulseboard-ui lands
-        language: [python]
+        language: [python, javascript-typescript]
 
     steps:
       - uses: actions/checkout@v6
