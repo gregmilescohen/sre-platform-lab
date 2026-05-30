@@ -17,7 +17,7 @@ export function useEvents(intervalMs: number = 10_000): UseEventsResult {
 
   const fetchData = useCallback(async () => {
     try {
-      const res = await fetch('/api/events?bucket=minute');
+      const res = await fetch('/api/events/?bucket=minute');
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = (await res.json()) as EventDataResponse;
       setData(json);
