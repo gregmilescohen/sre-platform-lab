@@ -17,5 +17,6 @@ jobs:
     with:
       app-name: pulseboard-shared
       working-directory: apps/lib
+      coverage-source: pulseboard_shared
     secrets:
       codecov-token: ${{ secrets.CODECOV_TOKEN }}
