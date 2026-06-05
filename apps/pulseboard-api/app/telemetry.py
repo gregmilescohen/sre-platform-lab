@@ -21,7 +21,5 @@ def setup_tracing() -> None:
 
     resource = Resource.create({SERVICE_NAME: "pulseboard-api"})
     provider = TracerProvider(resource=resource)
-    provider.add_span_processor(
-        BatchSpanProcessor(OTLPSpanExporter(endpoint=endpoint, insecure=True))
-    )
+    provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter(endpoint=endpoint)))
     trace.set_tracer_provider(provider)
