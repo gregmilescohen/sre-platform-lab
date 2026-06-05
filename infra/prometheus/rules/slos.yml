@@ -11,7 +11,7 @@ groups:
       - record: job:pulseboard_api_availability:ratio_rate5m
         expr: |
           1 - (
-            sum(job:pulseboard_api_errors_total:rate5m)
+            (sum(job:pulseboard_api_errors_total:rate5m) or vector(0))
             /
             sum(job:pulseboard_api_requests_total:rate5m)
           )
@@ -19,7 +19,7 @@ groups:
       - record: job:pulseboard_api_availability:ratio_rate30m
         expr: |
           1 - (
-            sum(rate(pulseboard_api_requests_total{status_code=~"5.."}[30m]))
+            (sum(rate(pulseboard_api_requests_total{status_code=~"5.."}[30m])) or vector(0))
             /
             sum(rate(pulseboard_api_requests_total[30m]))
           )
