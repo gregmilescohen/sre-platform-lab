@@ -70,6 +70,8 @@ open http://localhost:8090  # watch agent sessions
 | Prometheus | http://localhost:9090 | |
 | Alertmanager | http://localhost:9093 | |
 | Loki | http://localhost:3100 | Query logs via Grafana |
+| Grafana Tempo | http://localhost:3200 | Query traces via Grafana Explore → Tempo |
+| OTel Collector | http://localhost:4317 | gRPC ingest; 4318 for HTTP |
 | Alloy UI | http://localhost:12345 | Log collector pipeline |
 | SRE Agent | http://localhost:8090 | Agent session dashboard |
 

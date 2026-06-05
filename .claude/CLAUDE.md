@@ -15,7 +15,7 @@ Alertmanager alerts using OpenCode with BigPickle (free LLM, no subscription req
 | `apps/pulseboard-consumer/` | Pub/Sub consumer → writes to event_log (Postgres), exposes Prometheus metrics on :9102 |
 | `apps/pulseboard-ui/` | React + Vite dashboard showing live event rate |
 | `sre-agent/` | Webhook-triggered FastAPI service — spawns OpenCode on alert |
-| `infra/` | Prometheus, Grafana, Loki, Alloy, Alertmanager, Tempo configs — operational from Task 2 |
+| `infra/` | Prometheus, Grafana, Loki, Alloy, Alertmanager, Tempo, OTel Collector configs |
 | `chaos/` | Failure-injection scripts |
 | `runbooks/` | SLO runbooks |
 
@@ -32,6 +32,9 @@ Alertmanager alerts using OpenCode with BigPickle (free LLM, no subscription req
 | Loki | 3100 |
 | Pub/Sub Emulator | 8085 |
 | Consumer Metrics | 9102 |
+| Grafana Tempo | 3200 |
+| OTel Collector gRPC | 4317 |
+| OTel Collector HTTP | 4318 |
 
 ## Common Commands
 
@@ -70,9 +73,16 @@ Alertmanager → POST /webhook → sre-agent FastAPI
     → Python monitor.py polls Alertmanager for resolution
 ```
 
+## Observability Pillars
+
+- **Metrics** — Prometheus scrapes pulseboard-api (:8080/metrics) and pulseboard-consumer (:9102/metrics)
+- **Logs** — Grafana Alloy ships Docker container logs to Loki; query via Grafana Explore → Loki
+- **Traces** — pulseboard-api instruments via OTel SDK → OTel Collector (:4317 gRPC) → Grafana Tempo (:3200); query via Grafana Explore → Tempo
+  - OTel is a no-op when `OTEL_EXPORTER_OTLP_ENDPOINT` is unset (unit tests are unaffected)
+
 ## Current State
 
-Task 4 complete — pulseboard-worker operational. Publishes 5 synthetic events/second to the pulseboard-events Pub/Sub topic.
+Task 7 complete — OTel traces wired up. pulseboard-api sends traces to OTel Collector → Tempo. Tasks 5 and 6 (consumer, UI) are also complete.
 
 ## Conventions
 
