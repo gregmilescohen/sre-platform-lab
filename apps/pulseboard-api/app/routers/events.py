@@ -23,6 +23,11 @@ router = APIRouter()
 _VALID_BUCKETS = {"minute", "hour"}
 
 
+def _safe_log(value: str) -> str:
+    """Strip newlines from user-provided strings before interpolating into log messages."""
+    return value.replace("\n", " ").replace("\r", " ")
+
+
 def _truncate(dt: datetime, bucket: str) -> datetime:
     """Truncate a datetime to the start of a minute or hour bucket."""
     if bucket == "hour":
@@ -59,9 +64,11 @@ def emit_event(
             publisher=publisher,
         )
     except Exception as exc:
-        logger.error("Failed to publish event %s: %s", payload.event_name, exc)
+        logger.error("Failed to publish event %s: %s", _safe_log(payload.event_name), exc)
         raise HTTPException(status_code=500, detail=f"Failed to publish event: {exc}") from exc
-    logger.info("Published event event_name=%s message_id=%s", payload.event_name, message_id)
+    logger.info(
+        "Published event event_name=%s message_id=%s", _safe_log(payload.event_name), message_id
+    )
     return EmitResponse(published=True, message_id=message_id)
 
 
@@ -95,5 +102,5 @@ def get_events(
     events = query.order_by(EventLog.received_at).all()
     data = _bucket_events(events, bucket)
 
-    logger.info("Fetched events count=%d bucket=%s", len(events), bucket)
+    logger.info("Fetched events count=%d bucket=%s", len(events), _safe_log(bucket))
     return EventDataResponse(event_name=event_name, since=since, bucket=bucket, data=data)

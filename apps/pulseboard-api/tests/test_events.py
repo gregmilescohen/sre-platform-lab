@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from app.models import EventLog
-from app.routers.events import _bucket_events, emit_event, get_events
+from app.routers.events import _bucket_events, _safe_log, emit_event, get_events
 from app.schemas import EmitRequest
 from fastapi import HTTPException
 
@@ -212,3 +212,28 @@ def test_bucket_events_sorted_by_time() -> None:
 
     data = _bucket_events(events, "minute")
     assert data[0].time_bucket < data[1].time_bucket
+
+
+# ---------------------------------------------------------------------------
+# _safe_log — log injection sanitizer
+# ---------------------------------------------------------------------------
+
+
+def test_safe_log_passthrough_for_normal_strings() -> None:
+    """_safe_log leaves strings without newlines unchanged."""
+    assert _safe_log("cpu_spike") == "cpu_spike"
+
+
+def test_safe_log_strips_newline() -> None:
+    """_safe_log replaces newline characters with a space."""
+    assert _safe_log("event\nname") == "event name"
+
+
+def test_safe_log_strips_carriage_return() -> None:
+    """_safe_log replaces carriage return characters with a space."""
+    assert _safe_log("event\rname") == "event name"
+
+
+def test_safe_log_strips_crlf() -> None:
+    """_safe_log replaces CRLF sequences with spaces."""
+    assert _safe_log("line1\r\nline2") == "line1  line2"
