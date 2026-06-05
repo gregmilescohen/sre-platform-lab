@@ -12,7 +12,7 @@ groups:
         annotations:
           summary: "PulseBoard API error rate critically high (fast burn)"
           description: >
-            Availability {{ printf "%.2f" (mul $value 100) }}% over 5m.
+            Availability {{ $value | humanizePercentage }} over 5m.
             SLO 99.5%. Fast burn at 14x — investigate immediately.
           runbook_url: "https://github.com/gregmilescohen/sre-platform-lab/blob/main/runbooks/high-error-rate.md"
 
@@ -27,7 +27,7 @@ groups:
         annotations:
           summary: "PulseBoard API error rate elevated (slow burn)"
           description: >
-            Availability {{ printf "%.2f" (mul $value 100) }}% over 30m. SLO 99.5%.
+            Availability {{ $value | humanizePercentage }} over 30m. SLO 99.5%.
           runbook_url: "https://github.com/gregmilescohen/sre-platform-lab/blob/main/runbooks/high-error-rate.md"
 
       - alert: PulseBoardHighLatency
@@ -40,7 +40,7 @@ groups:
         annotations:
           summary: "PulseBoard API p95 latency > 500ms"
           description: >
-            p95 {{ printf "%.0f" (mul $value 1000) }}ms. SLO < 500ms.
+            p95 {{ $value | humanizeDuration }}. SLO < 500ms.
           runbook_url: "https://github.com/gregmilescohen/sre-platform-lab/blob/main/runbooks/high-latency.md"
 
       - alert: PulseBoardAPIDown
