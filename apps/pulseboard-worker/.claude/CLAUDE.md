@@ -10,7 +10,7 @@ loop. See repo root `CLAUDE.md` for the full ecosystem context.
 ## Tech stack
 
 - Python 3.13 / uv
-- `google-cloud-pubsub` for Pub/Sub publishing
+- stdlib only (`urllib.request`) — no third-party dependencies
 - Docker (python:3.13-slim + uv)
 
 ## Directory structure
@@ -44,11 +44,9 @@ make run        # run locally (requires Pub/Sub emulator or real GCP)
 
 | Variable | Default | Description |
 |----------|---------|-------------|
+| `PULSEBOARD_API_URL` | `http://localhost:8080` | Base URL of the pulseboard-api |
 | `PUBLISH_INTERVAL_SECONDS` | `1.0` | Seconds to sleep between batches |
 | `BATCH_SIZE` | `5` | Events per batch |
-| `PUBSUB_PROJECT_ID` | `pulseboard` | GCP project ID |
-| `PUBSUB_TOPIC_ID` | `pulseboard-events` | Pub/Sub topic name |
-| `PUBSUB_EMULATOR_HOST` | — | Set to `host:port` to use the emulator |
 | `LOG_LEVEL` | `INFO` | Python logging level |
 
 ## Notes

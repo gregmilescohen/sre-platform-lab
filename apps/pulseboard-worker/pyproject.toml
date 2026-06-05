@@ -2,9 +2,7 @@
 name = "pulseboard-worker"
 version = "0.1.0"
 requires-python = ">=3.13"
-dependencies = [
-    "google-cloud-pubsub>=2.21.0",
-]
+dependencies = []
 
 [dependency-groups]
 dev = [

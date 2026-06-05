@@ -11,11 +11,8 @@ help: ## Show available commands
 .PHONY: up
 up: ## Start all services and open dashboards in browser (NO_CACHE=1 to force image rebuild)
 	$(if $(NO_CACHE),docker compose build --no-cache &&,) docker compose up -d
-	@echo "Waiting for API to become healthy..."
-	@until curl -sf http://localhost:8080/health > /dev/null 2>&1; do sleep 1; done
-	@echo "API healthy — starting event emitter in background..."
-	@pkill -f 'scripts/emit_events.py' 2>/dev/null || true
-	@python3 scripts/emit_events.py &
+	@echo "Waiting for services to become available..."
+	@sleep 3
 	$(MAKE) open
 
 .PHONY: watch
@@ -36,7 +33,6 @@ endif
 
 .PHONY: down
 down: ## Stop all containers
-	@pkill -f 'scripts/emit_events.py' 2>/dev/null || true
 	docker compose down
 
 .PHONY: down-volumes
