@@ -4,10 +4,11 @@ COPY --from=ghcr.io/astral-sh/uv:0.7.8 /uv /usr/local/bin/uv
 
 WORKDIR /app
 
-# Shared lib must be available at ../lib for uv to resolve the path dependency
-COPY lib/ /lib/
+# Copy shared lib first so ../lib resolves to /app/lib (not the system /lib)
+COPY lib/ ./lib/
 
-# App manifests
+WORKDIR /app/pulseboard-api
+
 COPY pulseboard-api/pyproject.toml pulseboard-api/uv.lock* ./
 
 RUN uv sync --frozen --no-dev --no-editable

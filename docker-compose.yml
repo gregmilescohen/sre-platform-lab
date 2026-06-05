@@ -166,11 +166,14 @@ services:
       PUBSUB_EMULATOR_HOST: pubsub-emulator:8085
       PUBSUB_PROJECT_ID: pulseboard
       PUBSUB_TOPIC_ID: pulseboard-events
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
     depends_on:
       postgres:
         condition: service_healthy
       pubsub-setup:
         condition: service_completed_successfully
+      otel-collector:
+        condition: service_started
     restart: unless-stopped
     develop:
       watch:
@@ -255,8 +258,33 @@ services:
         - action: rebuild
           path: ./apps/pulseboard-ui/package-lock.json
 
+  tempo:
+    image: grafana/tempo:2.4.1
+    container_name: tempo
+    command: ["-config.file=/etc/tempo.yaml"]
+    volumes:
+      - ./infra/tempo/tempo-config.yml:/etc/tempo.yaml:ro
+      - tempo-data:/tmp/tempo
+    ports:
+      - "3200:3200"
+    restart: unless-stopped
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.100.0
+    container_name: otel-collector
+    command: ["--config=/etc/otel/config.yml"]
+    volumes:
+      - ./infra/otel/otel-collector-config.yml:/etc/otel/config.yml:ro
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+    depends_on:
+      - tempo
+    restart: unless-stopped
+
 volumes:
   prometheus-data:
   grafana-data:
   loki-data:
   postgres-data:
+  tempo-data:

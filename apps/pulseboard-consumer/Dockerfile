@@ -1,7 +1,9 @@
 FROM python:3.13-slim
 COPY --from=ghcr.io/astral-sh/uv:0.7.8 /uv /usr/local/bin/uv
 WORKDIR /app
-COPY lib/ /lib/
+# Copy shared lib first so ../lib resolves to /app/lib (not the system /lib)
+COPY lib/ ./lib/
+WORKDIR /app/pulseboard-consumer
 COPY pulseboard-consumer/pyproject.toml pulseboard-consumer/uv.lock* ./
 RUN uv sync --no-group dev --frozen
 COPY pulseboard-consumer/app/ ./app/

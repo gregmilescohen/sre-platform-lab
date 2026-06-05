@@ -14,16 +14,21 @@ from collections.abc import AsyncGenerator, Callable
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, Response
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
 from app.db import create_tables
 from app.metrics import record_request
 from app.routers import events, health
+from app.telemetry import setup_tracing
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
-    """FastAPI lifespan context manager — creates DB tables on startup."""
+    """FastAPI lifespan context manager — sets up tracing and creates DB tables on startup."""
+    setup_tracing()
+    SQLAlchemyInstrumentor().instrument()
     create_tables()
     yield
 
@@ -34,6 +39,8 @@ app = FastAPI(
     description="Backend API for the PulseBoard demo workload in the Reliability Lab.",
     lifespan=lifespan,
 )
+
+FastAPIInstrumentor.instrument_app(app)
 
 
 @app.middleware("http")
