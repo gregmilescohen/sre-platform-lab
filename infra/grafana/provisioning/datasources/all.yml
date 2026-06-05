@@ -27,3 +27,6 @@ datasources:
       tracesToLogsV2:
         datasourceUid: Loki
         filterByTraceID: true
+        tags:
+          - key: service.name
+            value: service
