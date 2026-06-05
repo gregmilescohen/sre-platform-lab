@@ -47,6 +47,9 @@ def _configure_json_logging() -> None:
     root = logging.getLogger()
     root.handlers = [handler]
     root.setLevel(logging.INFO)
+    # uvicorn.access has propagate=False so it bypasses the root handler
+    uvicorn_access = logging.getLogger("uvicorn.access")
+    uvicorn_access.handlers = [handler]
 
 
 def setup_tracing() -> None:
