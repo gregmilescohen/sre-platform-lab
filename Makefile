@@ -22,7 +22,7 @@ watch: ## Start services and watch for code changes (live sync — no browser op
 .PHONY: open
 open: ## Open PulseBoard UI, Grafana, and Alertmanager in browser tabs
 ifeq ($(OS),Darwin)
-	@open http://localhost:5173 2>/dev/null || true
+	@open -n http://localhost:5173 2>/dev/null || true
 	@open http://localhost:3000 2>/dev/null || true
 	@open http://localhost:9093 2>/dev/null || true
 else
