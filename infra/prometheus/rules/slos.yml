@@ -1,0 +1,37 @@
+groups:
+  - name: pulseboard-sli-recording-rules
+    interval: 30s
+    rules:
+      - record: job:pulseboard_api_requests_total:rate5m
+        expr: rate(pulseboard_api_requests_total[5m])
+
+      - record: job:pulseboard_api_errors_total:rate5m
+        expr: rate(pulseboard_api_requests_total{status_code=~"5.."}[5m])
+
+      - record: job:pulseboard_api_availability:ratio_rate5m
+        expr: |
+          1 - (
+            sum(job:pulseboard_api_errors_total:rate5m)
+            /
+            sum(job:pulseboard_api_requests_total:rate5m)
+          )
+
+      - record: job:pulseboard_api_availability:ratio_rate30m
+        expr: |
+          1 - (
+            sum(rate(pulseboard_api_requests_total{status_code=~"5.."}[30m]))
+            /
+            sum(rate(pulseboard_api_requests_total[30m]))
+          )
+
+      - record: job:pulseboard_api_latency_p95:rate5m
+        expr: |
+          histogram_quantile(0.95,
+            sum by (le) (rate(pulseboard_api_request_duration_seconds_bucket[5m]))
+          )
+
+      - record: job:pulseboard_api_latency_p99:rate5m
+        expr: |
+          histogram_quantile(0.99,
+            sum by (le) (rate(pulseboard_api_request_duration_seconds_bucket[5m]))
+          )
