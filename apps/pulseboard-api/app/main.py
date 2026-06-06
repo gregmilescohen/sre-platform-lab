@@ -18,8 +18,10 @@ from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
+from app.chaos import apply_chaos_delay, get_chaos_state, should_inject_error
 from app.db import create_tables
 from app.metrics import record_request
+from app.routers import chaos as chaos_router
 from app.routers import events, health
 from app.telemetry import setup_tracing
 
@@ -45,16 +47,25 @@ FastAPIInstrumentor.instrument_app(app)
 
 @app.middleware("http")
 async def metrics_middleware(request: Request, call_next: Callable) -> Response:
-    """Record RED metrics for every HTTP request."""
+    """Record RED metrics and apply chaos injection on every request."""
     start = time.perf_counter()
+    path = request.url.path
+
+    if not path.startswith("/chaos") and path != "/metrics":
+        state = get_chaos_state()
+        apply_chaos_delay(state)
+        if should_inject_error(state):
+            duration = time.perf_counter() - start
+            record_request(request.method, path, 500, duration)
+            return Response(
+                content='{"detail":"chaos: injected error"}',
+                status_code=500,
+                media_type="application/json",
+            )
+
     response = await call_next(request)
     duration = time.perf_counter() - start
-    record_request(
-        method=request.method,
-        endpoint=request.url.path,
-        status_code=response.status_code,
-        duration=duration,
-    )
+    record_request(request.method, path, response.status_code, duration)
     return response
 
 
@@ -66,3 +77,4 @@ async def metrics() -> Response:
 
 app.include_router(health.router)
 app.include_router(events.router, prefix="/events", tags=["events"])
+app.include_router(chaos_router.router, prefix="/chaos", tags=["chaos"])
