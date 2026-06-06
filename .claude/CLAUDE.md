@@ -10,7 +10,7 @@ Alertmanager alerts using OpenCode with BigPickle (free LLM, no subscription req
 
 | Directory | Purpose |
 |-----------|---------|
-| `apps/pulseboard-api/` | FastAPI backend — POST /events (emit), GET /events (read), RED metrics, chaos endpoints |
+| `apps/pulseboard-api/` | FastAPI backend — POST /events (emit), GET /events (read), RED metrics; chaos endpoints: POST /chaos/errors, POST /chaos/slow, POST /chaos/leak, POST /chaos/reset, GET /chaos/status. Chaos state is in-process (resets on container restart). |
 | `apps/pulseboard-worker/` | Synthetic event generator — publishes randomised events to Pub/Sub at configurable rate; env vars: `PUBLISH_INTERVAL_SECONDS`, `BATCH_SIZE` |
 | `apps/pulseboard-consumer/` | Pub/Sub consumer → writes to event_log (Postgres), exposes Prometheus metrics on :9102 |
 | `apps/pulseboard-ui/` | React + Vite dashboard showing live event rate |
@@ -95,7 +95,7 @@ Runbooks: `runbooks/high-error-rate.md`, `runbooks/high-latency.md`
 
 ## Current State
 
-Task 8 complete — SLIs/SLOs, alert rules, Grafana dashboard (pulseboard-overview), and runbooks. Tasks 5, 6, and 7 (consumer, UI, OTel traces) are also complete.
+Tasks 9 and 10 complete — chaos endpoints in pulseboard-api and chaos shell scripts. Tasks 5–8 also complete (consumer, UI, OTel traces, SLIs/SLOs/alerts/dashboard).
 
 ## Conventions
 
