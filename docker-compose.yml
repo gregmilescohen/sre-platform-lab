@@ -190,7 +190,7 @@ services:
       pubsub-setup:
         condition: service_completed_successfully
       otel-collector:
-        condition: service_healthy
+        condition: service_started
     restart: unless-stopped
     develop:
       watch:
@@ -312,11 +312,6 @@ services:
       - "4317:4317"
       - "4318:4318"
       - "13133:13133"
-    healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:13133"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     depends_on:
       tempo:
         condition: service_healthy
