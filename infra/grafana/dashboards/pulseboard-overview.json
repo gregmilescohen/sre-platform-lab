@@ -195,8 +195,7 @@
       "targets": [{
         "limit": 20,
         "query": "{resource.service.name=\"pulseboard-api\"}",
-        "queryType": "traceqlSearch",
-        "tableType": "traces",
+        "queryType": "traceql",
         "refId": "A"
       }],
       "title": "Recent Traces — pulseboard-api",
@@ -209,8 +208,7 @@
       "targets": [{
         "limit": 20,
         "query": "{resource.service.name=\"pulseboard-api\" && status=error}",
-        "queryType": "traceqlSearch",
-        "tableType": "traces",
+        "queryType": "traceql",
         "refId": "A"
       }],
       "title": "Error Traces (zero rows = healthy)",
