@@ -80,9 +80,22 @@ Alertmanager → POST /webhook → sre-agent FastAPI
 - **Traces** — pulseboard-api instruments via OTel SDK → OTel Collector (:4317 gRPC) → Grafana Tempo (:3200); query via Grafana Explore → Tempo
   - OTel is a no-op when `OTEL_EXPORTER_OTLP_ENDPOINT` is unset (unit tests are unaffected)
 
+## SLOs
+
+- **Availability:** 99.5% over 30m (`job:pulseboard_api_availability:ratio_rate30m`)
+- **Latency:** p95 < 500ms over 5m (`job:pulseboard_api_latency_p95:rate5m`)
+
+Alert rules in `infra/prometheus/rules/alerts.yml`:
+- `PulseBoardHighErrorRateFast` (critical) — 14x burn rate over 5m
+- `PulseBoardHighErrorRateSlow` (warning) — 2x burn rate over 30m
+- `PulseBoardHighLatency` (warning) — p95 > 500ms for 5m
+- `PulseBoardAPIDown` (critical) — scrape target down for 1m
+
+Runbooks: `runbooks/high-error-rate.md`, `runbooks/high-latency.md`
+
 ## Current State
 
-Task 7 complete — OTel traces wired up. pulseboard-api sends traces to OTel Collector → Tempo. Tasks 5 and 6 (consumer, UI) are also complete.
+Task 8 complete — SLIs/SLOs, alert rules, Grafana dashboard (pulseboard-overview), and runbooks. Tasks 5, 6, and 7 (consumer, UI, OTel traces) are also complete.
 
 ## Conventions
 

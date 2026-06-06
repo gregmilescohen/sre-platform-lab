@@ -1,19 +1,20 @@
 """Tests for the pulseboard-worker event publisher."""
 
 import json
-from unittest.mock import MagicMock
+import urllib.error
+from unittest.mock import MagicMock, patch
 
 import pytest
 from app.worker import EVENT_TYPES, build_event, publish_batch
 
 
 def test_build_event_returns_required_fields() -> None:
-    """build_event must include event_name, metadata, and emitted_at."""
+    """build_event includes event_name and required metadata fields."""
     event = build_event("page_view")
     assert event["event_name"] == "page_view"
     assert "metadata" in event
-    assert "emitted_at" in event
     assert "session_id" in event["metadata"]
+    assert "emitted_at" in event["metadata"]
 
 
 @pytest.mark.parametrize("event_type", EVENT_TYPES)
@@ -23,82 +24,84 @@ def test_build_event_all_known_types(event_type: str) -> None:
     assert event["event_name"] == event_type
 
 
-def test_publish_batch_calls_publisher_per_event() -> None:
-    """publish_batch publishes exactly batch_size events."""
-    mock_publisher = MagicMock()
-    mock_publisher.publish.return_value.result.return_value = "msg-id"
-
-    result = publish_batch(mock_publisher, "projects/p/topics/t", batch_size=3)
-
-    assert mock_publisher.publish.call_count == 3
-    assert result == 3
+def test_build_event_body_is_valid_emit_request() -> None:
+    """build_event produces a dict matching the EmitRequest schema (event_name + metadata)."""
+    event = build_event("checkout")
+    assert set(event.keys()) == {"event_name", "metadata"}
+    assert isinstance(event["metadata"], dict)
 
 
-def test_publish_batch_encodes_as_json_bytes() -> None:
-    """publish_batch passes valid JSON bytes to the publisher."""
-    mock_publisher = MagicMock()
-    mock_publisher.publish.return_value.result.return_value = "msg-id"
+def test_publish_batch_posts_once_per_event() -> None:
+    """publish_batch calls urlopen exactly batch_size times."""
+    with patch("app.worker.urllib.request.urlopen") as mock_open:
+        ok, err = publish_batch("http://api:8080", batch_size=3)
 
-    publish_batch(mock_publisher, "projects/p/topics/t", batch_size=1)
+    assert mock_open.call_count == 3
+    assert ok == 3
+    assert err == 0
 
-    data_arg = mock_publisher.publish.call_args[0][1]
-    payload = json.loads(data_arg.decode("utf-8"))
+
+def test_publish_batch_sends_json_to_correct_url() -> None:
+    """publish_batch POSTs valid JSON to /events/ on the given base URL."""
+    with patch("app.worker.urllib.request.urlopen") as mock_open:
+        publish_batch("http://api:8080", batch_size=1)
+
+    req = mock_open.call_args[0][0]
+    assert req.full_url == "http://api:8080/events/"
+    assert req.get_header("Content-type") == "application/json"
+    payload = json.loads(req.data.decode())
     assert "event_name" in payload
     assert "metadata" in payload
 
 
-def test_publish_batch_counts_only_successful_publishes() -> None:
-    """publish_batch returns count of successful futures, skipping failures."""
-    success_future = MagicMock()
-    success_future.result.return_value = "msg-id"
-    fail_future = MagicMock()
-    fail_future.result.side_effect = Exception("broker unavailable")
+def test_publish_batch_counts_errors() -> None:
+    """publish_batch returns error count when urlopen raises URLError."""
+    with patch(
+        "app.worker.urllib.request.urlopen",
+        side_effect=urllib.error.URLError("connection refused"),
+    ):
+        ok, err = publish_batch("http://api:8080", batch_size=3)
 
-    mock_publisher = MagicMock()
-    mock_publisher.publish.side_effect = [success_future, fail_future, success_future]
+    assert ok == 0
+    assert err == 3
 
-    result = publish_batch(mock_publisher, "projects/p/topics/t", batch_size=3)
 
-    assert result == 2
+def test_publish_batch_partial_failure() -> None:
+    """publish_batch correctly tallies mixed success and failure."""
+    responses = [MagicMock(), urllib.error.URLError("timeout"), MagicMock()]
+
+    def _side_effect(*_args: object, **_kwargs: object) -> MagicMock:
+        val = responses.pop(0)
+        if isinstance(val, Exception):
+            raise val
+        return val  # type: ignore[return-value]
+
+    with patch("app.worker.urllib.request.urlopen", side_effect=_side_effect):
+        ok, err = publish_batch("http://api:8080", batch_size=3)
+
+    assert ok == 2
+    assert err == 1
 
 
 class _BreakLoop(Exception):
-    """Sentinel exception used to escape the run() infinite loop in tests."""
+    """Sentinel to escape the run() infinite loop in tests."""
 
 
-def test_run_creates_publisher_and_publishes_batches() -> None:
-    """run() starts a publisher, calls publish_batch, and sleeps each iteration."""
-    from unittest.mock import patch
+def test_run_calls_publish_batch_and_sleeps() -> None:
+    """run() calls publish_batch and sleeps each iteration."""
+    with patch("app.worker.publish_batch", return_value=(5, 0)) as mock_publish:
+        with patch("app.worker.time.sleep", side_effect=_BreakLoop):
+            with pytest.raises(_BreakLoop):
+                from app.worker import run
 
-    from app.worker import run
-
-    mock_publisher = MagicMock()
-    mock_publisher.topic_path.return_value = "projects/pulseboard/topics/t"
-    mock_client = MagicMock()
-    mock_client.__enter__ = MagicMock(return_value=mock_publisher)
-    mock_client.__exit__ = MagicMock(return_value=False)
-
-    with patch("app.worker.pubsub_v1.PublisherClient", return_value=mock_client):
-        with patch("app.worker.publish_batch", return_value=5) as mock_publish:
-            with patch("app.worker.time.sleep", side_effect=_BreakLoop):
-                with pytest.raises(_BreakLoop):
-                    run()
+                run()
 
     mock_publish.assert_called_once()
 
 
 def test_run_reads_env_vars() -> None:
-    """run() picks up PUBLISH_INTERVAL_SECONDS and BATCH_SIZE from the environment."""
+    """run() picks up PUBLISH_INTERVAL_SECONDS, BATCH_SIZE, and PULSEBOARD_API_URL."""
     import os
-    from unittest.mock import patch
-
-    from app.worker import run
-
-    mock_publisher = MagicMock()
-    mock_publisher.topic_path.return_value = "projects/pulseboard/topics/t"
-    mock_client = MagicMock()
-    mock_client.__enter__ = MagicMock(return_value=mock_publisher)
-    mock_client.__exit__ = MagicMock(return_value=False)
 
     sleep_args: list[float] = []
 
@@ -106,14 +109,21 @@ def test_run_reads_env_vars() -> None:
         sleep_args.append(interval)
         raise _BreakLoop
 
-    env = {**os.environ, "PUBLISH_INTERVAL_SECONDS": "0.5", "BATCH_SIZE": "2"}
+    env = {
+        **os.environ,
+        "PUBLISH_INTERVAL_SECONDS": "0.5",
+        "BATCH_SIZE": "2",
+        "PULSEBOARD_API_URL": "http://custom-api:9000",
+    }
     with patch.dict(os.environ, env, clear=True):
-        with patch("app.worker.pubsub_v1.PublisherClient", return_value=mock_client):
-            with patch("app.worker.publish_batch", return_value=2) as mock_publish:
-                with patch("app.worker.time.sleep", side_effect=capture_sleep):
-                    with pytest.raises(_BreakLoop):
-                        run()
+        with patch("app.worker.publish_batch", return_value=(2, 0)) as mock_publish:
+            with patch("app.worker.time.sleep", side_effect=capture_sleep):
+                with pytest.raises(_BreakLoop):
+                    from app.worker import run
+
+                    run()
 
     assert sleep_args == [0.5]
-    _, kwargs = mock_publish.call_args
-    assert kwargs.get("batch_size") == 2
+    call_kwargs = mock_publish.call_args
+    assert call_kwargs[1].get("batch_size") == 2
+    assert call_kwargs[0][0] == "http://custom-api:9000"

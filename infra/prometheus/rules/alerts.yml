@@ -1,0 +1,54 @@
+groups:
+  - name: pulseboard-slo-alerts
+    rules:
+      - alert: PulseBoardHighErrorRateFast
+        expr: |
+          job:pulseboard_api_availability:ratio_rate5m < (1 - 14 * (1 - 0.995))
+        for: 2m
+        labels:
+          severity: critical
+          service: pulseboard-api
+          slo: availability
+        annotations:
+          summary: "PulseBoard API error rate critically high (fast burn)"
+          description: >
+            Availability {{ $value | humanizePercentage }} over 5m.
+            SLO 99.5%. Fast burn at 14x — investigate immediately.
+          runbook_url: "https://github.com/gregmilescohen/sre-platform-lab/blob/main/runbooks/high-error-rate.md"
+
+      - alert: PulseBoardHighErrorRateSlow
+        expr: |
+          job:pulseboard_api_availability:ratio_rate30m < (1 - 2 * (1 - 0.995))
+        for: 15m
+        labels:
+          severity: warning
+          service: pulseboard-api
+          slo: availability
+        annotations:
+          summary: "PulseBoard API error rate elevated (slow burn)"
+          description: >
+            Availability {{ $value | humanizePercentage }} over 30m. SLO 99.5%.
+          runbook_url: "https://github.com/gregmilescohen/sre-platform-lab/blob/main/runbooks/high-error-rate.md"
+
+      - alert: PulseBoardHighLatency
+        expr: job:pulseboard_api_latency_p95:rate5m > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          service: pulseboard-api
+          slo: latency
+        annotations:
+          summary: "PulseBoard API p95 latency > 500ms"
+          description: >
+            p95 {{ $value | humanizeDuration }}. SLO < 500ms.
+          runbook_url: "https://github.com/gregmilescohen/sre-platform-lab/blob/main/runbooks/high-latency.md"
+
+      - alert: PulseBoardAPIDown
+        expr: up{job="pulseboard-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: pulseboard-api
+        annotations:
+          summary: "PulseBoard API unreachable"
+          description: "Prometheus cannot scrape pulseboard-api."

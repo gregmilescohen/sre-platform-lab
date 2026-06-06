@@ -23,11 +23,11 @@ watch: ## Start services and watch for code changes (live sync — no browser op
 open: ## Open PulseBoard UI, Grafana, and Alertmanager in browser tabs
 ifeq ($(OS),Darwin)
 	@open http://localhost:5173 2>/dev/null || true
-	@open http://localhost:3000 2>/dev/null || true
+	@open http://localhost:3000/d/pulseboard-overview/pulseboard-overview?orgId=1&refresh=5s&from=now-5m&to=now 2>/dev/null || true
 	@open http://localhost:9093 2>/dev/null || true
 else
 	@xdg-open http://localhost:5173 2>/dev/null || true
-	@xdg-open http://localhost:3000 2>/dev/null || true
+	@xdg-open http://localhost:3000/d/pulseboard-overview/pulseboard-overview?orgId=1&refresh=5s&from=now-5m&to=now 2>/dev/null || true
 	@xdg-open http://localhost:9093 2>/dev/null || true
 endif
 
