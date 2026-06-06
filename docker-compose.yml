@@ -49,6 +49,11 @@ services:
       - ./infra/grafana/provisioning:/etc/grafana/provisioning:ro
       - ./infra/grafana/dashboards:/var/lib/grafana/dashboards:ro
       - grafana-data:/var/lib/grafana
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     depends_on:
       prometheus:
         condition: service_healthy
@@ -83,6 +88,11 @@ services:
       # read logs, add `group_add: ["<docker-gid>"]` matching your host's docker GID.
       - /var/run/docker.sock:/var/run/docker.sock:ro
     command: run --server.http.listen-addr=0.0.0.0:12345 /etc/alloy/config.alloy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:12345/-/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     depends_on:
       loki:
         condition: service_healthy
@@ -168,13 +178,19 @@ services:
       PUBSUB_PROJECT_ID: pulseboard
       PUBSUB_TOPIC_ID: pulseboard-events
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
     depends_on:
       postgres:
         condition: service_healthy
       pubsub-setup:
         condition: service_completed_successfully
       otel-collector:
-        condition: service_started
+        condition: service_healthy
     restart: unless-stopped
     develop:
       watch:
@@ -196,7 +212,8 @@ services:
       PUBLISH_INTERVAL_SECONDS: "1.0"
       BATCH_SIZE: "5"
     depends_on:
-      - pulseboard-api
+      pulseboard-api:
+        condition: service_healthy
     restart: unless-stopped
     develop:
       watch:
@@ -221,6 +238,12 @@ services:
       PUBSUB_PROJECT_ID: pulseboard
       PUBSUB_SUBSCRIPTION_ID: pulseboard-events-sub
       METRICS_PORT: "9102"
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9102/metrics', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     depends_on:
       postgres:
         condition: service_healthy
@@ -244,8 +267,14 @@ services:
     container_name: pulseboard-ui
     ports:
       - "5173:5173"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:5173"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     depends_on:
-      - pulseboard-api
+      pulseboard-api:
+        condition: service_healthy
     restart: unless-stopped
     develop:
       watch:
@@ -265,6 +294,12 @@ services:
       - tempo-data:/tmp/tempo
     ports:
       - "3200:3200"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3200/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     restart: unless-stopped
 
   otel-collector:
@@ -276,8 +311,15 @@ services:
     ports:
       - "4317:4317"
       - "4318:4318"
+      - "13133:13133"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:13133"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     depends_on:
-      - tempo
+      tempo:
+        condition: service_healthy
     restart: unless-stopped
 
 volumes:
