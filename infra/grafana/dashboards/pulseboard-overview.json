@@ -192,7 +192,6 @@
       "datasource": { "type": "tempo", "uid": "tempo" },
       "gridPos": { "h": 10, "w": 12, "x": 12, "y": 36 },
       "id": 42,
-      "options": { "tableView": true },
       "targets": [{
         "limit": 20,
         "query": "{resource.service.name=\"pulseboard-api\"}",
@@ -200,13 +199,12 @@
         "refId": "A"
       }],
       "title": "Recent Traces — pulseboard-api",
-      "type": "traces"
+      "type": "table"
     },
     {
       "datasource": { "type": "tempo", "uid": "tempo" },
       "gridPos": { "h": 8, "w": 24, "x": 0, "y": 46 },
       "id": 43,
-      "options": { "tableView": true },
       "targets": [{
         "limit": 20,
         "query": "{resource.service.name=\"pulseboard-api\" && status=error}",
@@ -214,7 +212,7 @@
         "refId": "A"
       }],
       "title": "Error Traces (zero rows = healthy)",
-      "type": "traces"
+      "type": "table"
     }
   ],
   "refresh": "30s",
