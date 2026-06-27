@@ -95,7 +95,7 @@ Runbooks: `runbooks/high-error-rate.md`, `runbooks/high-latency.md`
 
 ## Current State
 
-Tasks 9 and 10 complete — chaos endpoints in pulseboard-api and chaos shell scripts. Tasks 5–8 also complete (consumer, UI, OTel traces, SLIs/SLOs/alerts/dashboard).
+Tasks 1–10 complete. Task 11 in progress — sre-agent Python tools layer (alertmanager.py, prometheus.py) and OpenCode MCP config (opencode.json) scaffolded. Task 12 next: webhook FastAPI service, runner, monitor, Dockerfile, docker-compose integration.
 
 ## Conventions
 

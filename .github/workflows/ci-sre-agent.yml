@@ -1,0 +1,22 @@
+name: sre-agent CI
+
+on:
+  push:
+    branches: [main]
+    paths: ["sre-agent/**"]
+  pull_request:
+    branches: [main]
+    paths: ["sre-agent/**"]
+
+jobs:
+  ci:
+    uses: ./.github/workflows/python-app-ci.yml
+    permissions:
+      checks: write
+      contents: read
+    with:
+      app-name: sre-agent
+      working-directory: sre-agent
+      coverage-source: agent
+    secrets:
+      codecov-token: ${{ secrets.CODECOV_TOKEN }}
