@@ -10,7 +10,7 @@ Alertmanager alerts using OpenCode with BigPickle (free LLM, no subscription req
 
 | Directory | Purpose |
 |-----------|---------|
-| `apps/pulseboard-api/` | FastAPI backend — POST /events (emit), GET /events (read), RED metrics; chaos endpoints: POST /chaos/errors, POST /chaos/slow, POST /chaos/leak, POST /chaos/reset, GET /chaos/status. Chaos state is in-process (resets on container restart). |
+| `apps/pulseboard-api/` | FastAPI backend — POST /events (emit), GET /events (read), RED metrics; chaos endpoints: POST /chaos/errors, POST /chaos/slow, POST /chaos/leak, POST /chaos/reset, GET /chaos/status. Chaos state is in-process (resets on container restart). Hot-reload enabled: `./apps/pulseboard-api/app` is bind-mounted into the container; changes to `.py` files take effect within seconds without rebuilding. |
 | `apps/pulseboard-worker/` | Synthetic event generator — publishes randomised events to Pub/Sub at configurable rate; env vars: `PUBLISH_INTERVAL_SECONDS`, `BATCH_SIZE` |
 | `apps/pulseboard-consumer/` | Pub/Sub consumer → writes to event_log (Postgres), exposes Prometheus metrics on :9102 |
 | `apps/pulseboard-ui/` | React + Vite dashboard showing live event rate |
@@ -95,7 +95,7 @@ Runbooks: `runbooks/high-error-rate.md`, `runbooks/high-latency.md`
 
 ## Current State
 
-Tasks 1–10 complete. Task 11 in progress — sre-agent Python tools layer (alertmanager.py, prometheus.py) and OpenCode MCP config (opencode.json) scaffolded. Task 12 next: webhook FastAPI service, runner, monitor, Dockerfile, docker-compose integration.
+Tasks 1–11 complete. Task 13 complete — pulseboard-api hot-reload via bind-mount + uvicorn --reload. Task 14 next: chaos-agent container.
 
 ## Conventions
 
